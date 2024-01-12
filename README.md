@@ -4,7 +4,9 @@ JSMN
 [![Build Status](https://travis-ci.org/zserge/jsmn.svg?branch=master)](https://travis-ci.org/zserge/jsmn)
 
 jsmn (pronounced like 'jasmine') is a minimalistic JSON parser in C.  It can be
-easily integrated into resource-limited or embedded projects.
+easily integrated into resource-limited or embedded projects.  This variant is
+identical to Serge Zaitsev's original single-file jsmn.h, but split into a jsmn.c
+and jsmn.h for workflows that require a two-file implementation.
 
 You can find more information about JSON format at [json.org][1]
 
