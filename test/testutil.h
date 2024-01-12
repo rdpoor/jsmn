@@ -3,18 +3,18 @@
 
 #include "../jsmn.h"
 
-static int vtokeq(const char *s, jsmntok_t *t, unsigned long numtok,
+static int vtokeq(const char *s, jsmn_token_t *t, unsigned long numtok,
                   va_list ap) {
   if (numtok > 0) {
     unsigned long i;
     int start, end, size;
-    jsmntype_t type;
+    jsmn_token_type_t type;
     char *value;
 
     size = -1;
     value = NULL;
     for (i = 0; i < numtok; i++) {
-      type = va_arg(ap, jsmntype_t);
+      type = va_arg(ap, jsmn_token_type_t);
       if (type == JSMN_STRING) {
         value = va_arg(ap, char *);
         size = va_arg(ap, int);
@@ -61,7 +61,7 @@ static int vtokeq(const char *s, jsmntok_t *t, unsigned long numtok,
   return 1;
 }
 
-static int tokeq(const char *s, jsmntok_t *tokens, unsigned long numtok, ...) {
+static int tokeq(const char *s, jsmn_token_t *tokens, unsigned long numtok, ...) {
   int ok;
   va_list args;
   va_start(args, numtok);
@@ -74,8 +74,8 @@ static int parse(const char *s, int status, unsigned long numtok, ...) {
   int r;
   int ok = 1;
   va_list args;
-  jsmn_parser p;
-  jsmntok_t *t = malloc(numtok * sizeof(jsmntok_t));
+  jsmn_parser_t p;
+  jsmn_token_t *t = malloc(numtok * sizeof(jsmn_token_t));
 
   jsmn_init(&p);
   r = jsmn_parse(&p, s, strlen(s), t, numtok);

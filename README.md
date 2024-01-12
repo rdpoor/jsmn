@@ -87,8 +87,8 @@ Download `jsmn.h`, include it, done.
 #include "jsmn.h"
 
 ...
-jsmn_parser p;
-jsmntok_t t[128]; /* We expect no more than 128 JSON tokens */
+jsmn_parser_t p;
+jsmn_token_t t[128]; /* We expect no more than 128 JSON tokens */
 
 jsmn_init(&p);
 r = jsmn_parse(&p, s, strlen(s), t, 128); // "s" is the char array holding the json content
@@ -111,7 +111,7 @@ from multiple C files, to avoid duplication of symbols you may define  `JSMN_HEA
 API
 ---
 
-Token types are described by `jsmntype_t`:
+Token types are described by `jsmn_token_type_t`:
 
 	typedef enum {
 		JSMN_UNDEFINED = 0,
@@ -119,7 +119,7 @@ Token types are described by `jsmntype_t`:
 		JSMN_ARRAY = 1 << 1,
 		JSMN_STRING = 1 << 2,
 		JSMN_PRIMITIVE = 1 << 3
-	} jsmntype_t;
+	} jsmn_token_type_t;
 
 **Note:** Unlike JSON data types, primitive tokens are not divided into
 numbers, booleans and null, because one can easily tell the type using the
@@ -129,23 +129,23 @@ first character:
 * <code>'n'</code> - null
 * <code>'-', '0'..'9'</code> - number
 
-Token is an object of `jsmntok_t` type:
+Token is an object of `jsmn_token_t` type:
 
 	typedef struct {
-		jsmntype_t type; // Token type
+		jsmn_token_type_t type; // Token type
 		int start;       // Token start position
 		int end;         // Token end position
 		int size;        // Number of child (nested) tokens
-	} jsmntok_t;
+	} jsmn_token_t;
 
 **Note:** string tokens point to the first character after
 the opening quote and the previous symbol before final quote. This was made 
 to simplify string extraction from JSON data.
 
-All job is done by `jsmn_parser` object. You can initialize a new parser using:
+All job is done by `jsmn_parser_t` object. You can initialize a new parser using:
 
-	jsmn_parser parser;
-	jsmntok_t tokens[10];
+	jsmn_parser_t parser;
+	jsmn_token_t tokens[10];
 
 	jsmn_init(&parser);
 

@@ -43,7 +43,7 @@ typedef enum {
   JSMN_ARRAY = 1 << 1,
   JSMN_STRING = 1 << 2,
   JSMN_PRIMITIVE = 1 << 3
-} jsmntype_t;
+} jsmn_token_type_t;
 
 enum jsmnerr {
   /* Not enough tokens were provided */
@@ -60,37 +60,37 @@ enum jsmnerr {
  * start	start position in JSON data string
  * end		end position in JSON data string
  */
-typedef struct jsmntok {
-  jsmntype_t type;
+typedef struct {
+  jsmn_token_type_t type;
   int start;
   int end;
   int size;
 #ifdef JSMN_PARENT_LINKS
   int parent;
 #endif
-} jsmntok_t;
+} jsmn_token_t;
 
 /**
  * JSON parser. Contains an array of token blocks available. Also stores
  * the string being parsed now and current position in that string.
  */
-typedef struct jsmn_parser {
+typedef struct {
   unsigned int pos;     /* offset in the JSON string */
   unsigned int toknext; /* next token to allocate */
   int toksuper;         /* superior token node, e.g. parent object or array */
-} jsmn_parser;
+} jsmn_parser_t;
 
 /**
  * Create JSON parser over an array of tokens
  */
-void jsmn_init(jsmn_parser *parser);
+void jsmn_init(jsmn_parser_t *parser);
 
 /**
  * Run JSON parser. It parses a JSON data string into and array of tokens, each
  * describing a single JSON object.
  */
-int jsmn_parse(jsmn_parser *parser, const char *js, const size_t len,
-               jsmntok_t *tokens, const unsigned int num_tokens);
+int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len,
+               jsmn_token_t *tokens, const unsigned int num_tokens);
 
 #ifdef __cplusplus
 }
