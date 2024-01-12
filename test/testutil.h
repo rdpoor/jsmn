@@ -77,8 +77,8 @@ static int parse(const char *s, int status, unsigned long numtok, ...) {
   jsmn_parser_t p;
   jsmn_token_t *t = malloc(numtok * sizeof(jsmn_token_t));
 
-  jsmn_init(&p);
-  r = jsmn_parse(&p, s, strlen(s), t, numtok);
+  jsmn_init(&p, t, numtok);
+  r = jsmn_parse(&p, s, strlen(s));
   if (r != status) {
     printf("status is %d, not %d\n", r, status);
     return 0;
