@@ -5,7 +5,7 @@ JSMN
 
 jsmn (pronounced like 'jasmine') is a minimalistic JSON parser in C.  It can be
 easily integrated into resource-limited or embedded projects.  This version is
-based on[Serge Zaitsev's original single-file jsmn.h](https://github.com/zserge/jsmn) with several key differences:
+based on [Serge Zaitsev's original single-file jsmn.h](https://github.com/zserge/jsmn) with several key differences:
 * jsmn is split into two files, jsmn.h and jsmn.c for ease of integration into
 workflows that need a two-file layout.
 * Each parsed token carries a pointer and a length field to its underlying JSON
@@ -16,20 +16,18 @@ help categorize parsed tokens.
 
 You can find more information about JSON format at [json.org][1]
 
-Library sources are available at https://github.com/zserge/jsmn
+zserge's original sources are available at https://github.com/zserge/jsmn
 
-The web page with some information about the original jsmn design can be found
+The web page with information on the original jsmn design can be found
 at [http://zserge.com/jsmn.html][2]
 
 Philosophy
 ----------
 
-Most JSON parsers offer you a bunch of functions to load JSON data, parse it
-and extract any value by its name. jsmn proves that checking the correctness of
-every JSON packet or allocating temporary objects to store parsed JSON fields
-often is an overkill. 
-
-JSON format itself is extremely simple, so why should we complicate it?
+Most JSON parsers offer you a suite of functions to load JSON data, parse it
+and extract any value by its name. jsmn takes the view this this is overkill
+and instead parses the JSON data into individual token strings, leaving it to
+the user to perform the conversion from string to the desired type.
 
 jsmn is designed to be	**robust** (it should work fine even with erroneous
 data), **fast** (it should parse data on the fly), **portable** (no superfluous
@@ -41,14 +39,12 @@ Features
 --------
 
 * compatible with C89
-* no dependencies (even libc!)
+* minimal stdxxx dependencies
 * highly portable (tested on x86/amd64, ARM, AVR)
-* about 200 lines of code
 * extremely small code footprint
-* The main API contains only 2 functions
 * no dynamic memory allocation
 * incremental single-pass parsing
-* library code is covered with unit-tests
+* (increasingly) complete coverage with unit tests
 
 Design
 ------
@@ -63,16 +59,16 @@ It holds the following tokens:
 * Strings: `"name"`, `"Jack"`, `"age"` (keys and some values)
 * Number: `27`
 
-In jsmn, tokens do not hold any data, but point to token boundaries in JSON
+In jsmn, tokens do not hold parsed data, but point to token boundaries in JSON
 string instead. In the example above jsmn will create tokens like:
 * Object: `{ "na...`, length = 30
 * String: `name" : ...`, length = 4
 * String: `Jack", ...`, length = 4
 * String: `age" : ...`, length = 3
-* Number: `27 }'`, length = 2
+* Number: `27 }`, length = 2
 
 Every jsmn token has a type, which indicates the type of corresponding JSON
-token. jsmn supports the following token types:
+token. jsmn supports the following primitive token types:
 
 * Object - a container of key-value pairs, e.g.:
 	`{ "foo":"bar", "x":0.3 }`
