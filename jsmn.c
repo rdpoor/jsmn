@@ -113,7 +113,7 @@ int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len) {
                     return JSMN_ERROR_INVAL;
                 }
 #endif
-                t->size++;
+                t->child_count++;
 #ifdef JSMN_PARENT_LINKS
                 token->parent = parser->toksuper;
 #endif
@@ -182,7 +182,7 @@ int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len) {
             }
             count++;
             if (parser->toksuper != -1 && parser->tokens != NULL) {
-                parser->tokens[parser->toksuper].size++;
+                parser->tokens[parser->toksuper].child_count++;
             }
             break;
         case '\t':
@@ -233,7 +233,7 @@ int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len) {
             if (parser->tokens != NULL && parser->toksuper != -1) {
                 const jsmn_token_t *t = &parser->tokens[parser->toksuper];
                 if (t->type == JSMN_OBJECT ||
-                    (t->type == JSMN_STRING && t->size != 0)) {
+                    (t->type == JSMN_STRING && t->child_count != 0)) {
                     return JSMN_ERROR_INVAL;
                 }
             }
@@ -247,7 +247,7 @@ int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len) {
             }
             count++;
             if (parser->toksuper != -1 && parser->tokens != NULL) {
-                parser->tokens[parser->toksuper].size++;
+                parser->tokens[parser->toksuper].child_count++;
             }
             break;
 
@@ -388,7 +388,7 @@ static jsmn_token_t *jsmn_alloc_token(jsmn_parser_t *parser) {
     tok = &parser->tokens[parser->toknext++];
     tok->start = NULL;
     tok->strlen = -1;
-    tok->size = 0;
+    tok->child_count = 0;
 #ifdef JSMN_PARENT_LINKS
     tok->parent = -1;
 #endif
@@ -400,7 +400,7 @@ static void jsmn_fill_token(jsmn_token_t *token, const jsmn_token_type_t type,
     token->type = type;
     token->start = start;
     token->strlen = length;
-    token->size = 0;
+    token->child_count = 0;
 }
 
 static int jsmn_parse_primitive(jsmn_parser_t *parser, const char *js,

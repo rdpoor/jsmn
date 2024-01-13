@@ -46,26 +46,26 @@ typedef enum {
   JSMN_PRIMITIVE = 1 << 3,
 } jsmn_token_type_t;
 
-enum jsmnerr {
+typedef enum {
   /* Not enough tokens were provided */
   JSMN_ERROR_NOMEM = -1,
   /* Invalid character inside JSON string */
   JSMN_ERROR_INVAL = -2,
   /* The string is not a full JSON packet, more bytes expected */
   JSMN_ERROR_PART = -3
-};
+} jsmn_err_t;
 
 /**
  * JSON token description.
  * type		type (object, array, string etc.)
- * start	start position in JSON data string
- * end		end position in JSON data string
+ * start	pointer to the first char of the token string
+ * strlen number of characters in the token string.
  */
 typedef struct {
   jsmn_token_type_t type;
   const char *start;     // start of token string
   int strlen;            // length of token string
-  int size;              // number of nested tokens within OBJECT or ARRAy
+  int child_count;       // number of nested tokens within OBJECT or ARRAy
 #ifdef JSMN_PARENT_LINKS
   int parent;            // index to token that contains this token
 #endif

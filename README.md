@@ -4,12 +4,15 @@ JSMN
 [![Build Status](https://travis-ci.org/zserge/jsmn.svg?branch=master)](https://travis-ci.org/zserge/jsmn)
 
 jsmn (pronounced like 'jasmine') is a minimalistic JSON parser in C.  It can be
-easily integrated into resource-limited or embedded projects.  This variant is
-nearly identical to [Serge Zaitsev's original single-file jsmn.h](https://github.com/zserge/jsmn) with two differences:
-* It is split into two files, jsmn.h header and jsmn.c implementation for
+easily integrated into resource-limited or embedded projects.  This version is
+based on[Serge Zaitsev's original single-file jsmn.h](https://github.com/zserge/jsmn) with several key differences:
+* jsmn is split into two files, jsmn.h and jsmn.c for ease of integration into
 workflows that need a two-file layout.
-* A token object stores a pointer to the start of the token and the length of
-the token (rather than start index and end index within the containing string).
+* Each parsed token carries a pointer and a length field to its underlying JSON
+string.
+* jsmn_token_ref() provides a safe accessor to the parsed tokens.
+* A suite of predicates -- jsmn_token_is_array(), jsmn_token_is_number(), etc --
+help categorize parsed tokens.
 
 You can find more information about JSON format at [json.org][1]
 
@@ -88,7 +91,7 @@ it possible to use zero-copy techniques.
 Usage
 -----
 
-Download `jsmn.h`, include it, done.
+Download `jsmn.h` and `jsmn.c` and incorporate them into your project.
 
 ```
 #include "jsmn.h"
@@ -139,13 +142,25 @@ typedef struct {
 the opening quote and the previous symbol before final quote. This was made 
 to simplify string extraction from JSON data.
 
-All job is done by `jsmn_parser_t` object. You can initialize a new parser using:
+All the parsing is done by a `jsmn_parser_t` object. You can parse a JSON string
+as follows:
 
 ```
+    #include "jsmn.h"
+
+	// you must provide a parser object and an array of tokens
 	jsmn_parser_t parser;
 	jsmn_token_t tokens[10];
-	jsmn_init(&parser, tokens, 10);       // provide an array of 10 tokens
-	jsmn_parse(&parser, js, strlen(js));  // js is the JSON string to be parsed
+
+    // initialize the parser and call jsmn_parse() on the string to be parsed.
+	jsmn_init(&parser, tokens, sizeof(tokens)/sizeof(jsmn_token_t));
+	int r = jsmn_parse(&parser, js, strlen(js));
+
+	if (r < 0) {
+		// there was some sort of error.  See JSMN_ERROR_NOMEM, etc, in jsmn.h
+	} else {
+		// r represents how many tokens were parsed.
+	}
 ```
 
 This will create a parser, and then it tries to parse up to 10 JSON tokens from
