@@ -24,6 +24,7 @@
 #ifndef JSMN_H
 #define JSMN_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -42,7 +43,7 @@ typedef enum {
   JSMN_OBJECT = 1 << 0,
   JSMN_ARRAY = 1 << 1,
   JSMN_STRING = 1 << 2,
-  JSMN_PRIMITIVE = 1 << 3
+  JSMN_PRIMITIVE = 1 << 3,
 } jsmn_token_type_t;
 
 enum jsmnerr {
@@ -62,13 +63,11 @@ enum jsmnerr {
  */
 typedef struct {
   jsmn_token_type_t type;
-  // int start;
-  // int end;
-  const char *start;
-  int length;
-  int size;
+  const char *start;     // start of token string
+  int strlen;            // length of token string
+  int size;              // number of nested tokens within OBJECT or ARRAy
 #ifdef JSMN_PARENT_LINKS
-  int parent;
+  int parent;            // index to token that contains this token
 #endif
 } jsmn_token_t;
 
@@ -95,9 +94,27 @@ void jsmn_init(jsmn_parser_t *parser, jsmn_token_t *tokens, unsigned int num_tok
  */
 int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len);
 
+/**
+ * @brief Return a token, referenced by index.  Return NULL if out of range.
+ */
+jsmn_token_t *jsmn_token_ref(jsmn_parser_t *parser, int index);
+
 jsmn_token_type_t jsmn_token_type(jsmn_token_t *token);
 const char *jsmn_token_string(jsmn_token_t *token);
-int jsmn_token_length(jsmn_token_t *token);
+int jsmn_token_strlen(jsmn_token_t *token);
+
+bool jsmn_token_is_array(jsmn_token_t *token);
+bool jsmn_token_is_boolean(jsmn_token_t *token);
+bool jsmn_token_is_false(jsmn_token_t *token);
+bool jsmn_token_is_float(jsmn_token_t *token);
+bool jsmn_token_is_integer(jsmn_token_t *token);
+bool jsmn_token_is_null(jsmn_token_t *token);
+bool jsmn_token_is_number(jsmn_token_t *token);
+bool jsmn_token_is_object(jsmn_token_t *token);
+bool jsmn_token_is_primitive(jsmn_token_t *token);
+bool jsmn_token_is_string(jsmn_token_t *token);
+bool jsmn_token_is_true(jsmn_token_t *token);
+bool jsmn_token_is_array(jsmn_token_t *token);
 
 #ifdef __cplusplus
 }

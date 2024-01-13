@@ -332,6 +332,144 @@ int test_object_key(void) {
   return 0;
 }
 
+int test_token_types(void) {
+    jsmn_token_t tokens[10];
+    jsmn_parser_t parser;
+    const char *js = "[1, -1.2, true, false, null, \"a\", {\"x\":\"y\"}]";
+    jsmn_token_t *token;
+
+    jsmn_init(&parser, tokens, sizeof(tokens) / sizeof(tokens[0]));
+    check(jsmn_parse(&parser, js, strlen(js)) == 10);
+
+    // [
+    token = jsmn_token_ref(&parser, 0);
+    check(jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(!jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // 1
+    token = jsmn_token_ref(&parser, 1);
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // -1.2
+    token = jsmn_token_ref(&parser, 2);
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // true
+    token = jsmn_token_ref(&parser, 3);
+    check(!jsmn_token_is_array(token));
+    check(jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(jsmn_token_is_true(token));
+
+    // false
+    token = jsmn_token_ref(&parser, 4);
+    check(!jsmn_token_is_array(token));
+    check(jsmn_token_is_boolean(token));
+    check(jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // null
+    token = jsmn_token_ref(&parser, 5);
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // "a"
+    token = jsmn_token_ref(&parser, 6);
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(!jsmn_token_is_primitive(token));
+    check(jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // {
+    token = jsmn_token_ref(&parser, 7);
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(jsmn_token_is_object(token));
+    check(!jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    // pathology
+    token = NULL;
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(!jsmn_token_is_primitive(token));
+    check(!jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
+    return 0;
+}
+
 int main(void) {
   test(test_empty, "test for a empty JSON objects/arrays");
   test(test_object, "test for a JSON objects");
@@ -350,6 +488,7 @@ int main(void) {
   test(test_nonstrict, "test for non-strict mode");
   test(test_unmatched_brackets, "test for unmatched brackets");
   test(test_object_key, "test for key type");
+  test(test_token_types, "test token type predicates");
   printf("\nPASSED: %d\nFAILED: %d\n", test_passed, test_failed);
   return (test_failed > 0);
 }

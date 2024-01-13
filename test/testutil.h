@@ -37,8 +37,8 @@ static int vtokeq(const char *s, jsmn_token_t *t, unsigned long numtok,
           printf("token %lu start is %ld, not %d\n", i, (t[i].start - s), start);
           return 0;
         }
-        if ((t[i].start + t[i].length - s) != end) {
-          printf("token %lu end is %ld, not %d\n", i, (t[i].start + t[i].length - s), end);
+        if ((t[i].start + t[i].strlen - s) != end) {
+          printf("token %lu end is %ld, not %d\n", i, (t[i].start + t[i].strlen - s), end);
           return 0;
         }
       }
@@ -49,9 +49,9 @@ static int vtokeq(const char *s, jsmn_token_t *t, unsigned long numtok,
 
       if (s != NULL && value != NULL) {
         const char *p = t[i].start;
-        if (strlen(value) != (unsigned long)(t[i].length) ||
-            strncmp(t[i].start, value, t[i].length) != 0) {
-          printf("token %lu value is %.*s, not %s\n", i, t[i].length,
+        if (strlen(value) != (unsigned long)(t[i].strlen) ||
+            strncmp(t[i].start, value, t[i].strlen) != 0) {
+          printf("token %lu value is %.*s, not %s\n", i, t[i].strlen,
                  t[i].start, value);
           return 0;
         }
