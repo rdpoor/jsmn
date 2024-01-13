@@ -467,6 +467,24 @@ int test_token_types(void) {
     check(!jsmn_token_is_string(token));
     check(!jsmn_token_is_true(token));
 
+    // more pathology
+    const char *js2 = "[\"-3.14159\"]";
+    check(jsmn_parse(&parser, js2, strlen(js2)) == 2);
+
+    // "-3.14159" (note: that's a string, not a number)
+    token = jsmn_token_ref(&parser, 1);
+    check(!jsmn_token_is_array(token));
+    check(!jsmn_token_is_boolean(token));
+    check(!jsmn_token_is_false(token));
+    check(!jsmn_token_is_float(token));
+    check(!jsmn_token_is_integer(token));
+    check(!jsmn_token_is_null(token));
+    check(!jsmn_token_is_number(token));
+    check(!jsmn_token_is_object(token));
+    check(!jsmn_token_is_primitive(token));
+    check(jsmn_token_is_string(token));
+    check(!jsmn_token_is_true(token));
+
     return 0;
 }
 
