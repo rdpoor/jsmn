@@ -660,6 +660,57 @@ int test_hierarchy(void) {
     return 0;
 }
 
+int test_find_fns(void) {
+    jsmn_token_t tokens[15];
+    jsmn_parser_t parser;
+    int tok_index;
+    jsmn_token_t *tok;
+
+    jsmn_init(&parser, tokens, sizeof(tokens) / sizeof(tokens[0]));
+
+    const char *js1 =
+        // 0      1        2          3               4
+        "{\"jsonrpc\": \"2.0\", \"topic\":\"tstat-logic\", "
+        //    5              6           7
+        "\"method\": \"relay_set\", \"params\": "
+        // 8    9          10         11     12     13   14
+        "{\"id\":\"RELAY_Y\", \"value\":true}, \"id\": 5}";
+    check(jsmn_parse(&parser, js1, strlen(js1)) == 15);
+
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 0), js1));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 1), "jsonrpc"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 2), "2.0"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 3), "topic"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 4), "tstat-logic"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 5), "method"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 6), "relay_set"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 7), "params"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 8), "{\"id\":\"RELAY_Y\", \"value\":true}"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 9), "id"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 10), "RELAY_Y"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 11), "value"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 12), "true"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 13), "id"));
+    check(jsmn_token_stringeq(jsmn_token_ref(&parser, 14), "5"));
+
+    check(jsmn_token_find(&parser, "jsonrpc") == 1);
+    check(jsmn_token_find(&parser, "2.0") == 2);
+    check(jsmn_token_find(&parser, "topic") == 3);
+    check(jsmn_token_find(&parser, "tstat-logic") == 4);
+    check(jsmn_token_find(&parser, "method") == 5);
+    check(jsmn_token_find(&parser, "relay_set") == 6);
+    check(jsmn_token_find(&parser, "params") == 7);
+    check(jsmn_token_find(&parser, "id") == 9);       // finds first instance
+    check(jsmn_token_find(&parser, "RELAY_Y") == 10);
+    check(jsmn_token_find(&parser, "value") == 11);
+    check(jsmn_token_find(&parser, "true") == 12);
+    check(jsmn_token_find(&parser, "id") == 9);       // finds first instance
+    check(jsmn_token_find(&parser, "5") == 14);
+    check(jsmn_token_find(&parser, "xyzzy") == -1);   // not found
+
+    return 0;
+}
+
 int main(void) {
   test(test_empty, "test for a empty JSON objects/arrays");
   test(test_object, "test for a JSON objects");
@@ -680,6 +731,7 @@ int main(void) {
   test(test_object_key, "test for key type");
   test(test_token_types, "test token type predicates");
   test(test_hierarchy, "test hierarchy functions");
+  test(test_find_fns, "test find functions");
   printf("\nPASSED: %d\nFAILED: %d\n", test_passed, test_failed);
   return (test_failed > 0);
 }

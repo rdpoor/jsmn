@@ -200,7 +200,8 @@ int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len) {
                 parser->tokens[parser->parent_index].type != JSMN_ARRAY &&
                 parser->tokens[parser->parent_index].type != JSMN_OBJECT) {
 #ifdef JSMN_PARENT_LINKS
-                parser->parent_index = parser->tokens[parser->parent_index].parent_index;
+                parser->parent_index =
+                    parser->tokens[parser->parent_index].parent_index;
 #else
                 for (i = parser->token_count - 1; i >= 0; i--) {
                     if (parser->tokens[i].type == JSMN_ARRAY ||
@@ -322,8 +323,8 @@ int jsmn_parent_of(jsmn_parser_t *parser, int token_index) {
         return -1;
     } else {
         // search backwards from token_index - 1 for the first token with a
-        // smaller level number.
-        for (int i=token_index - 1; i >= 0; --i) {
+        // lower level number.
+        for (int i = token_index - 1; i >= 0; --i) {
             if (jsmn_token_level(jsmn_token_ref(parser, i)) < level) {
                 return i;
             }
@@ -357,11 +358,30 @@ int jsmn_child_of(jsmn_parser_t *parser, int token_index) {
         // if level is -1, then token_index was invalid.
         return -1;
     }
-    if (jsmn_token_level(jsmn_token_ref(parser, token_index + 1)) == level + 1) {
-        // next token is one level higher: it's a child...
+    if (jsmn_token_level(jsmn_token_ref(parser, token_index + 1)) ==
+        level + 1) {
+        // next token is one level deeper: it's a child...
         return token_index + 1;
     }
     // next token doesn't exist or has different level: not a child
+    return -1;
+}
+
+bool jsmn_token_stringeq(jsmn_token_t *token, const char *literal) {
+    // printf("stringeq tok '%.*s'\n", jsmn_token_strlen(token),
+    // jsmn_token_string(token));
+    return strncmp(literal, jsmn_token_string(token),
+                   jsmn_token_strlen(token)) == 0;
+}
+
+int jsmn_token_find(jsmn_parser_t *parser, const char *literal) {
+    for (int i = 0; i < parser->token_count; i++) {
+        if (jsmn_token_stringeq(jsmn_token_ref(parser, i), literal)) {
+            // got a match
+            return i;
+        }
+    }
+    // ran out of tokens without finding a sibling
     return -1;
 }
 

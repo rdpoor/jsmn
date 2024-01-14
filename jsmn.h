@@ -136,9 +136,20 @@ int jsmn_parent_of(jsmn_parser_t *parser, int token_index);
 int jsmn_sibling_of(jsmn_parser_t *parser, int token_index);
 
 /**
- * @brief Return the index of the first child of this token, if any.
+ * @brief Return the index of the first child of this token, if any, else -1.
  */
 int jsmn_child_of(jsmn_parser_t *parser, int token_index);
+
+/**
+ * @brief Return true if the underlying token string equals literal.
+ */
+bool jsmn_token_stringeq(jsmn_token_t *token, const char *literal);
+
+/**
+ * @brief Find index of the first token whose underlying string equals literal.
+ * Performs a linear, depth-first search, returning -1 if no match is found.
+ */
+int jsmn_token_find(jsmn_parser_t *parser, const char *literal);
 
 bool jsmn_token_is_array(jsmn_token_t *token);
 bool jsmn_token_is_boolean(jsmn_token_t *token);
