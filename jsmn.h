@@ -67,8 +67,9 @@ typedef struct {
   int strlen;            // length of token string
   int child_count;       // number of nested tokens within OBJECT or ARRAy
 #ifdef JSMN_PARENT_LINKS
-  int parent;            // index to token that contains this token
+  int parent_index;      // index to token that contains this token
 #endif
+  int level;
 } jsmn_token_t;
 
 /**
@@ -77,10 +78,11 @@ typedef struct {
  */
 typedef struct {
   jsmn_token_t *tokens;     // array of tokens
-  unsigned int num_tokens;  // number of tokens
-  unsigned int toknext;     // index of next available token to allocate
+  unsigned int num_tokens;  // number of available tokens
+  unsigned int token_count; // number of allocated tokens
   unsigned int pos;         // offset in the JSON string
-  int toksuper;         /* superior token node, e.g. parent object or array */
+  int parent_index;         // index of containing node (array or object) or -1
+  int level;
 } jsmn_parser_t;
 
 /**
@@ -99,9 +101,44 @@ int jsmn_parse(jsmn_parser_t *parser, const char *js, const size_t len);
  */
 jsmn_token_t *jsmn_token_ref(jsmn_parser_t *parser, int index);
 
+/**
+ * @brief Return the primitive type of the token: JSMN_OBJECT, JSMN_ARRAY,
+ * JSMN_STRING, JSMN_PRIMITIVE.  See jsmn_tokan_is_xxx() for finer-grained
+ * typing.
+ */
 jsmn_token_type_t jsmn_token_type(jsmn_token_t *token);
+
+/**
+ * @brief Return a pointer to the first character of the token's underlying
+ * string.
+ */
 const char *jsmn_token_string(jsmn_token_t *token);
+
+/**
+ * @brief Return the number of bytes in the token's underlying string.
+ */
 int jsmn_token_strlen(jsmn_token_t *token);
+
+/**
+ * @brief Return the hierarchical level of the given token: 0 for top level,
+ * 1 for nested 1 deep, etc.  Return -1 on NULL token.
+ */
+int jsmn_token_level(jsmn_token_t *token);
+
+/**
+ * @brief Return the index of the parent of this token, if any, else -1.
+ */
+int jsmn_parent_of(jsmn_parser_t *parser, int token_index);
+
+/**
+ * @brief Return the index of the next sibling of this token, if any, else -1.
+ */
+int jsmn_sibling_of(jsmn_parser_t *parser, int token_index);
+
+/**
+ * @brief Return the index of the first child of this token, if any.
+ */
+int jsmn_child_of(jsmn_parser_t *parser, int token_index);
 
 bool jsmn_token_is_array(jsmn_token_t *token);
 bool jsmn_token_is_boolean(jsmn_token_t *token);

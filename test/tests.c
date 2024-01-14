@@ -488,6 +488,178 @@ int test_token_types(void) {
     return 0;
 }
 
+
+int test_hierarchy(void) {
+    jsmn_token_t tokens[10];
+    jsmn_parser_t parser;
+    int tok_index;
+    jsmn_token_t *tok;
+
+    jsmn_init(&parser, tokens, sizeof(tokens) / sizeof(tokens[0]));
+
+    //          index: 0  1   2    3   4  5   6     7   8
+    const char *js1 = "{\"a\":1, \"b\":{\"c\":3}, \"d\":4}";
+    check(jsmn_parse(&parser, js1, strlen(js1)) == 9);
+
+    tok_index = 0;
+    tok = jsmn_token_ref(&parser, tok_index);  // {
+    // printf("tok %.*s level = %d\n", jsmn_token_strlen(tok), jsmn_token_string(tok), jsmn_token_level(tok));
+    check(jsmn_token_level(tok) == 0);
+    check(jsmn_parent_of(&parser, tok_index) == -1);
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == 1); // "a"
+
+    tok_index = 1;
+    tok = jsmn_token_ref(&parser, tok_index);  // "a"
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 2); // 1
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 2;
+    tok = jsmn_token_ref(&parser, tok_index);  // 1
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 3); // "b"
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 3;
+    tok = jsmn_token_ref(&parser, tok_index);  // "b"
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 4); // {
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 4;
+    tok = jsmn_token_ref(&parser, tok_index);  // {
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 7); // "d"
+    check(jsmn_child_of(&parser, tok_index) == 5);  // "c"
+
+    tok_index = 5;
+    tok = jsmn_token_ref(&parser, tok_index);  // "c"
+    check(jsmn_token_level(tok) == 2);
+    check(jsmn_parent_of(&parser, tok_index) == 4); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 6); // 3
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 6;
+    tok = jsmn_token_ref(&parser, tok_index);  // 3
+    check(jsmn_token_level(tok) == 2);
+    check(jsmn_parent_of(&parser, tok_index) == 4); // {
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 7;
+    tok = jsmn_token_ref(&parser, tok_index);  // "d"
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 8); // "d"
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 8;
+    tok = jsmn_token_ref(&parser, tok_index);  // 4
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // {
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == -1);  // "c"
+
+    //          index: 0 1   2   3
+    const char *js2 = "[10, 20, 30]";
+    check(jsmn_parse(&parser, js2, strlen(js2)) == 4);
+
+    tok_index = 0;
+    tok = jsmn_token_ref(&parser, tok_index);  // [
+    check(jsmn_token_level(tok) == 0);
+    check(jsmn_parent_of(&parser, tok_index) == -1);
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == 1); // 10
+
+    tok_index = 1;
+    tok = jsmn_token_ref(&parser, tok_index);  // 10
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // [
+    check(jsmn_sibling_of(&parser, tok_index) == 2); // 20
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 2;
+    tok = jsmn_token_ref(&parser, tok_index);  // 20
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // [
+    check(jsmn_sibling_of(&parser, tok_index) == 3); // 30
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 3;
+    tok = jsmn_token_ref(&parser, tok_index);  // 30
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // [
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    //          index: 0 1  2  3   4    5   6    7
+    const char *js3 = "[10, {\"a\":1, \"d\":4}, 30]";
+    check(jsmn_parse(&parser, js3, strlen(js3)) == 8);
+
+    tok_index = 0;
+    tok = jsmn_token_ref(&parser, tok_index);  // [
+    check(jsmn_token_level(tok) == 0);
+    check(jsmn_parent_of(&parser, tok_index) == -1);
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == 1); // 10
+
+    tok_index = 1;
+    tok = jsmn_token_ref(&parser, tok_index);  // 10
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // [
+    check(jsmn_sibling_of(&parser, tok_index) == 2); // {
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 2;
+    tok = jsmn_token_ref(&parser, tok_index);  // {
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // [
+    check(jsmn_sibling_of(&parser, tok_index) == 7); // 30
+    check(jsmn_child_of(&parser, tok_index) == 3); // "a"
+
+    tok_index = 3;
+    tok = jsmn_token_ref(&parser, tok_index);  // "a"
+    check(jsmn_token_level(tok) == 2);
+    check(jsmn_parent_of(&parser, tok_index) == 2); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 4); // 1
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 4;
+    tok = jsmn_token_ref(&parser, tok_index);  // 1
+    check(jsmn_token_level(tok) == 2);
+    check(jsmn_parent_of(&parser, tok_index) == 2); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 5); // "d"
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 5;
+    tok = jsmn_token_ref(&parser, tok_index);  // "d"
+    check(jsmn_token_level(tok) == 2);
+    check(jsmn_parent_of(&parser, tok_index) == 2); // {
+    check(jsmn_sibling_of(&parser, tok_index) == 6); // 4
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 6;
+    tok = jsmn_token_ref(&parser, tok_index);  // 4
+    check(jsmn_token_level(tok) == 2);
+    check(jsmn_parent_of(&parser, tok_index) == 2); // {
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    tok_index = 7;
+    tok = jsmn_token_ref(&parser, tok_index);  // 30
+    check(jsmn_token_level(tok) == 1);
+    check(jsmn_parent_of(&parser, tok_index) == 0); // [
+    check(jsmn_sibling_of(&parser, tok_index) == -1);
+    check(jsmn_child_of(&parser, tok_index) == -1);
+
+    return 0;
+}
+
 int main(void) {
   test(test_empty, "test for a empty JSON objects/arrays");
   test(test_object, "test for a JSON objects");
@@ -507,6 +679,7 @@ int main(void) {
   test(test_unmatched_brackets, "test for unmatched brackets");
   test(test_object_key, "test for key type");
   test(test_token_types, "test token type predicates");
+  test(test_hierarchy, "test hierarchy functions");
   printf("\nPASSED: %d\nFAILED: %d\n", test_passed, test_failed);
   return (test_failed > 0);
 }
